@@ -8,6 +8,51 @@ import React, { useState, useEffect, useRef } from "react";
 
 /* ---------------------------------------------------------------- DATA ---- */
 
+/* Colour themes. Each overrides the CSS custom properties on the .lp root.
+   Pass <LandingPage theme="sapphire" /> to lock one in; showThemePicker is preview-only. */
+export const THEMES = {
+  indigo: {
+    label: "Indigo",
+    note: "The original — cool, safe, very SaaS.",
+    vars: {
+      "--ind": "#4F46E5", "--ind-6": "#4338CA", "--ind-4": "#6366F1", "--ind-2": "#A5B4FC",
+      "--ind-tint": "#EEF0FF", "--ind-line": "#DDE1FE",
+      "--cyan": "#0891B2", "--cyan-tint": "#E0F5FA",
+      "--blob-a": "#C7D2FE", "--blob-b": "#CFFAFE",
+    },
+  },
+  sapphire: {
+    label: "Sapphire",
+    note: "Confident corporate blue. Reads as trustworthy enterprise software.",
+    vars: {
+      "--ind": "#2563EB", "--ind-6": "#1D4ED8", "--ind-4": "#3B82F6", "--ind-2": "#93C5FD",
+      "--ind-tint": "#E8F0FE", "--ind-line": "#D3E1FD",
+      "--cyan": "#0E7490", "--cyan-tint": "#DEF3F8",
+      "--blob-a": "#BFDBFE", "--blob-b": "#CCFBF1",
+    },
+  },
+  harbour: {
+    label: "Harbour Teal",
+    note: "Teal + slate. Cooler, more technical, less common in this category.",
+    vars: {
+      "--ind": "#0D9488", "--ind-6": "#0F766E", "--ind-4": "#14B8A6", "--ind-2": "#7FD8CE",
+      "--ind-tint": "#E3F5F2", "--ind-line": "#C9EAE5",
+      "--cyan": "#0369A1", "--cyan-tint": "#E0F0FA",
+      "--blob-a": "#CCFBF1", "--blob-b": "#DBEAFE",
+    },
+  },
+  ember: {
+    label: "Ink & Ember",
+    note: "Navy ink with a warm ember accent. Editorial, distinctly not a template.",
+    vars: {
+      "--ind": "#D0492B", "--ind-6": "#B03A20", "--ind-4": "#E4633F", "--ind-2": "#F2B39F",
+      "--ind-tint": "#FCEDE8", "--ind-line": "#F7DCD2",
+      "--cyan": "#12556B", "--cyan-tint": "#E1EFF3",
+      "--blob-a": "#FBDDD1", "--blob-b": "#D8E9EF",
+    },
+  },
+};
+
 const NAV = [
   { label: "Features", href: "#features" },
   { label: "Admin", href: "#admin" },
@@ -669,10 +714,14 @@ function FeatureExplorer() {
 
 /* ================================================================ PAGE ==== */
 
-export default function LandingPage() {
+export default function LandingPage({ theme = "indigo", showThemePicker = false }) {
   useReveal();
   const [scrolled, setScrolled] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [pick, setPick] = useState(theme);
+
+  const active = THEMES[pick] ? pick : "indigo";
+  const themeVars = THEMES[active].vars;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -682,8 +731,29 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="lp">
+    <div className="lp" style={themeVars}>
       <style>{CSS}</style>
+
+      {showThemePicker && (
+        <div className="lp-theming">
+          <span className="lp-theming-t">Colour theme</span>
+          <div className="lp-theming-row">
+            {Object.entries(THEMES).map(([k, t]) => (
+              <button
+                key={k}
+                type="button"
+                className={"lp-swatch" + (k === active ? " on" : "")}
+                onClick={() => setPick(k)}
+                title={t.note}
+              >
+                <i style={{ background: t.vars["--ind"] }} />
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <span className="lp-theming-n">{THEMES[active].note}</span>
+        </div>
+      )}
 
       {/* ------------------------------------------------------------ NAV -- */}
       <header className={"lp-nav" + (scrolled ? " stuck" : "")}>
@@ -1028,8 +1098,11 @@ const CSS = `
   --ind-4:#6366F1;
   --ind-2:#A5B4FC;
   --ind-tint:#EEF0FF;
+  --ind-line:#DDE1FE;
   --cyan:#0891B2;
   --cyan-tint:#E0F5FA;
+  --blob-a:#C7D2FE;
+  --blob-b:#CFFAFE;
 
   --green:#0E9F6E;
   --amber:#D97706;
@@ -1058,6 +1131,23 @@ const CSS = `
 /* ---------- reveal ---------- */
 .lp [data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
 .lp [data-reveal].is-in{opacity:1;transform:none}
+
+/* ---------- theme picker (preview only) ---------- */
+.lp-theming{
+  position:fixed;right:20px;bottom:20px;z-index:90;background:#fff;border:1px solid var(--line);
+  border-radius:14px;padding:13px 15px;box-shadow:var(--sh-3);display:flex;flex-direction:column;gap:9px;max-width:290px;
+}
+.lp-theming-t{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3)}
+.lp-theming-row{display:flex;flex-wrap:wrap;gap:6px}
+.lp-swatch{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink-2);
+  border:1.5px solid var(--line);background:#fff;padding:6px 10px;border-radius:100px;transition:all .18s;
+}
+.lp-swatch i{width:11px;height:11px;border-radius:50%;display:block}
+.lp-swatch:hover{border-color:var(--ind-2)}
+.lp-swatch.on{border-color:var(--ind);color:var(--ind-6);background:var(--ind-tint)}
+.lp-theming-n{font-size:11.5px;line-height:1.5;color:var(--ink-3)}
+@media(max-width:860px){.lp-theming{display:none}}
 
 /* ---------- nav ---------- */
 .lp-nav{position:fixed;top:0;left:0;right:0;z-index:60;transition:background .3s,box-shadow .3s,border-color .3s;border-bottom:1px solid transparent}
@@ -1118,8 +1208,8 @@ const CSS = `
   opacity:.9;
 }
 .lp-blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55}
-.lp-blob.b1{width:520px;height:520px;background:radial-gradient(circle,#C7D2FE,transparent 68%);top:-140px;left:-120px;animation:float1 18s ease-in-out infinite}
-.lp-blob.b2{width:600px;height:600px;background:radial-gradient(circle,#CFFAFE,transparent 66%);top:40px;right:-200px;animation:float2 22s ease-in-out infinite}
+.lp-blob.b1{width:520px;height:520px;background:radial-gradient(circle,var(--blob-a),transparent 68%);top:-140px;left:-120px;animation:float1 18s ease-in-out infinite}
+.lp-blob.b2{width:600px;height:600px;background:radial-gradient(circle,var(--blob-b),transparent 66%);top:40px;right:-200px;animation:float2 22s ease-in-out infinite}
 @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
 @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-46px,36px)}}
 
@@ -1128,7 +1218,7 @@ const CSS = `
 .lp-eyebrow{
   display:inline-flex;align-items:center;gap:8px;
   font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.4px;
-  color:var(--ind-6);background:var(--ind-tint);border:1px solid #DDE1FE;
+  color:var(--ind-6);background:var(--ind-tint);border:1px solid var(--ind-line);
   padding:7px 14px;border-radius:100px;margin-bottom:26px;
   animation:rise .7s cubic-bezier(.16,1,.3,1) both;
 }
@@ -1440,7 +1530,7 @@ const CSS = `
 .lp-card:hover{transform:translateY(-4px);box-shadow:var(--sh-2);border-color:var(--ind-2)}
 .lp-card-ico{
   width:46px;height:46px;border-radius:13px;background:linear-gradient(140deg,var(--ind-tint),#fff);
-  border:1px solid #E6E9FE;display:grid;place-items:center;font-size:21px;margin-bottom:16px;
+  border:1px solid var(--ind-line);display:grid;place-items:center;font-size:21px;margin-bottom:16px;
   transition:transform .3s cubic-bezier(.16,1,.3,1);
 }
 .lp-card:hover .lp-card-ico{transform:scale(1.08) rotate(-4deg)}
@@ -1456,8 +1546,8 @@ const CSS = `
 /* ---------- cta ---------- */
 .lp-cta{position:relative;padding:96px 32px;text-align:center;overflow:hidden;background:linear-gradient(180deg,#FFFFFF 0%,#F2F4FE 100%);border-top:1px solid var(--line)}
 .lp-cta-bg{position:absolute;inset:0;pointer-events:none}
-.lp-blob.c1{width:520px;height:520px;background:radial-gradient(circle,#C7D2FE,transparent 66%);bottom:-260px;left:8%;opacity:.6}
-.lp-blob.c2{width:460px;height:460px;background:radial-gradient(circle,#CFFAFE,transparent 66%);top:-200px;right:10%;opacity:.6}
+.lp-blob.c1{width:520px;height:520px;background:radial-gradient(circle,var(--blob-a),transparent 66%);bottom:-260px;left:8%;opacity:.6}
+.lp-blob.c2{width:460px;height:460px;background:radial-gradient(circle,var(--blob-b),transparent 66%);top:-200px;right:10%;opacity:.6}
 .lp-cta-in{position:relative;max-width:720px;margin:0 auto}
 .lp-cta-h2{font-family:'Bricolage Grotesque',sans-serif;font-size:44px;font-weight:800;letter-spacing:-1.8px;line-height:1.1;margin-bottom:16px}
 .lp-cta-sub{font-size:17.5px;line-height:1.62;color:var(--ink-2);margin-bottom:30px}

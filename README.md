@@ -11,9 +11,12 @@ https://anirudhatalmale6-alt.github.io/arivupmo-landing/
 import LandingPage from './LandingPage';
 
 export default function App() {
-  return <LandingPage />;
+  return <LandingPage theme="sapphire" />;   // "indigo" | "sapphire" | "harbour" | "ember"
 }
 ```
+
+The live preview adds `showThemePicker` so you can compare palettes. Once you pick one,
+drop that prop — the picker disappears entirely and the chosen theme is baked in.
 
 ## Notes
 - **Zero dependencies.** React only — no Tailwind, no styled-components, no icon library, no chart library.
