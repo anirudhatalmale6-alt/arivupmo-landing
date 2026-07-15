@@ -82,6 +82,8 @@ const DEMO_POINTS = [
   { icon: "🧭", t: "Tailored to your team", b: "We map ArivuPMO to how your PMO actually runs — roles, reporting, and governance." },
 ];
 const DEMO_TEAM_SIZES = ["1–10", "11–50", "51–200", "200+"];
+/* Where the Book a Demo form is sent. Swap for a backend POST endpoint if preferred. */
+const DEMO_EMAIL = "contactus@arivupmo.com";
 
 const HERO_BADGES = [
   "No credit card required",
@@ -770,8 +772,8 @@ function DemoSection() {
           {sent ? (
             <div className="lp-demo-done">
               <span className="lp-demo-done-ico">✓</span>
-              <h3>Request received</h3>
-              <p>Thanks — we&apos;ll be in touch within one business day to lock in a time that suits your team.</p>
+              <h3>Almost there</h3>
+              <p>Your email app should open with the request ready to send to our team. If it doesn&apos;t, email us at {DEMO_EMAIL} and we&apos;ll be in touch within one business day.</p>
               <button type="button" className="lp-btn-outline" onClick={() => setSent(false)}>
                 Book another
               </button>
@@ -781,6 +783,17 @@ function DemoSection() {
               className="lp-demo-form"
               onSubmit={(e) => {
                 e.preventDefault();
+                const f = e.target.elements;
+                const subject = `Demo request — ${f.first.value} ${f.last.value} (${f.company.value})`;
+                const body =
+                  `Name: ${f.first.value} ${f.last.value}\n` +
+                  `Work email: ${f.email.value}\n` +
+                  `Company: ${f.company.value}\n` +
+                  `Team size: ${size}\n` +
+                  `Interested in: ${f.message.value || "—"}\n`;
+                window.location.href = `mailto:${DEMO_EMAIL}?subject=${encodeURIComponent(
+                  subject
+                )}&body=${encodeURIComponent(body)}`;
                 setSent(true);
               }}
             >
