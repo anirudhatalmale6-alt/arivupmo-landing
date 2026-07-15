@@ -11,6 +11,16 @@ import React, { useState, useEffect, useRef } from "react";
 /* Colour themes. Each overrides the CSS custom properties on the .lp root.
    Pass <LandingPage theme="sapphire" /> to lock one in; showThemePicker is preview-only. */
 export const THEMES = {
+  coursera: {
+    label: "Coursera Blue",
+    note: "Clean Coursera-style blue on white. Trusted, education-grade, approachable.",
+    vars: {
+      "--ind": "#0056D2", "--ind-6": "#00419E", "--ind-4": "#2472E0", "--ind-2": "#9CC1F4",
+      "--ind-tint": "#EAF1FD", "--ind-line": "#D2E2FA",
+      "--cyan": "#0B6E99", "--cyan-tint": "#E3F0F6",
+      "--blob-a": "#CFE0FA", "--blob-b": "#E1EFFB",
+    },
+  },
   indigo: {
     label: "Indigo",
     note: "The original — cool, safe, very SaaS.",
@@ -55,12 +65,20 @@ export const THEMES = {
 
 const NAV = [
   { label: "Features", href: "#features" },
-  { label: "Admin", href: "#admin" },
   { label: "Roles", href: "#roles" },
-  { label: "Why Us", href: "#why" },
-  { label: "Settings", href: "#settings" },
+  { label: "Admin", href: "#admin" },
   { label: "Support", href: "#support" },
+  { label: "Settings", href: "#settings" },
+  { label: "Book a Demo", href: "#demo" },
 ];
+
+/* Book a Demo — standard demo-request section. */
+const DEMO_POINTS = [
+  { icon: "🎬", t: "See it on your projects", b: "A live walkthrough of Gantt, RAID, EVM, and Scrum using a real project scenario." },
+  { icon: "⏱️", t: "30 minutes, no slides", b: "Straight into the product. Bring your toughest delivery question." },
+  { icon: "🧭", t: "Tailored to your team", b: "We map ArivuPMO to how your PMO actually runs — roles, reporting, and governance." },
+];
+const DEMO_TEAM_SIZES = ["1–10", "11–50", "51–200", "200+"];
 
 const HERO_BADGES = [
   "No credit card required",
@@ -712,15 +730,112 @@ function FeatureExplorer() {
   );
 }
 
+/* ------------------------------------------------------- BOOK A DEMO ------ */
+
+function DemoSection() {
+  const [sent, setSent] = useState(false);
+  const [size, setSize] = useState(DEMO_TEAM_SIZES[1]);
+
+  return (
+    <section className="lp-sec demo" id="demo">
+      <div className="lp-demo" data-reveal>
+        <div className="lp-demo-left">
+          <span className="lp-kicker">Book a Demo</span>
+          <h2 className="lp-h2">See ArivuPMO on your projects</h2>
+          <p className="lp-sec-sub lp-demo-sub">
+            Book a live, no-pressure walkthrough. We&apos;ll show you exactly how ArivuPMO
+            fits the way your PMO plans, tracks, and reports.
+          </p>
+          <div className="lp-demo-points">
+            {DEMO_POINTS.map((p, i) => (
+              <div className="lp-demo-point" key={p.t} style={{ "--i": i }}>
+                <span className="lp-demo-point-ico">{p.icon}</span>
+                <div>
+                  <h3>{p.t}</h3>
+                  <p>{p.b}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="lp-demo-card">
+          {sent ? (
+            <div className="lp-demo-done">
+              <span className="lp-demo-done-ico">✓</span>
+              <h3>Request received</h3>
+              <p>Thanks — we&apos;ll be in touch within one business day to lock in a time that suits your team.</p>
+              <button type="button" className="lp-btn-outline" onClick={() => setSent(false)}>
+                Book another
+              </button>
+            </div>
+          ) : (
+            <form
+              className="lp-demo-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSent(true);
+              }}
+            >
+              <h3 className="lp-demo-form-t">Request your demo</h3>
+              <div className="lp-field-row">
+                <label className="lp-field">
+                  <span>First name</span>
+                  <input type="text" name="first" placeholder="Priya" required />
+                </label>
+                <label className="lp-field">
+                  <span>Last name</span>
+                  <input type="text" name="last" placeholder="Sharma" required />
+                </label>
+              </div>
+              <label className="lp-field">
+                <span>Work email</span>
+                <input type="email" name="email" placeholder="priya@company.com" required />
+              </label>
+              <label className="lp-field">
+                <span>Company</span>
+                <input type="text" name="company" placeholder="Your organisation" required />
+              </label>
+              <div className="lp-field">
+                <span>Team size</span>
+                <div className="lp-chipset">
+                  {DEMO_TEAM_SIZES.map((s) => (
+                    <button
+                      type="button"
+                      key={s}
+                      className={"lp-sizechip" + (s === size ? " on" : "")}
+                      onClick={() => setSize(s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <label className="lp-field">
+                <span>What would you like to see? (optional)</span>
+                <textarea name="message" rows={3} placeholder="EVM, RAID automation, resource forecasting…" />
+              </label>
+              <button type="submit" className="lp-btn-primary lg lp-demo-submit">
+                Request demo <span className="lp-arrow">→</span>
+              </button>
+              <p className="lp-demo-fine">No credit card required · We reply within 1 business day</p>
+            </form>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ================================================================ PAGE ==== */
 
-export default function LandingPage({ theme = "indigo", showThemePicker = false }) {
+export default function LandingPage({ theme = "coursera", showThemePicker = false }) {
   useReveal();
   const [scrolled, setScrolled] = useState(false);
   const [menu, setMenu] = useState(false);
   const [pick, setPick] = useState(theme);
 
-  const active = THEMES[pick] ? pick : "indigo";
+  const active = THEMES[pick] ? pick : "coursera";
   const themeVars = THEMES[active].vars;
 
   useEffect(() => {
@@ -780,7 +895,7 @@ export default function LandingPage({ theme = "indigo", showThemePicker = false 
 
           <div className="lp-nav-cta">
             <a className="lp-btn-ghost" href="#signin">Sign in</a>
-            <a className="lp-btn-primary sm" href="#start">Get started free</a>
+            <a className="lp-btn-primary sm" href="#demo">Book a Demo</a>
             <button
               className="lp-burger"
               type="button"
@@ -800,8 +915,8 @@ export default function LandingPage({ theme = "indigo", showThemePicker = false 
               </a>
             ))}
             <a href="#signin" onClick={() => setMenu(false)}>Sign in</a>
-            <a className="lp-mobile-cta" href="#start" onClick={() => setMenu(false)}>
-              Get started free
+            <a className="lp-mobile-cta" href="#demo" onClick={() => setMenu(false)}>
+              Book a Demo
             </a>
           </div>
         )}
@@ -840,7 +955,7 @@ export default function LandingPage({ theme = "indigo", showThemePicker = false 
             </p>
 
             <div className="lp-hero-btns">
-              <a className="lp-btn-primary" href="#start">
+              <a className="lp-btn-primary" href="#demo">
                 Get started free <span className="lp-arrow">→</span>
               </a>
               <a className="lp-btn-outline" href="#signin">Sign in</a>
@@ -1004,37 +1119,25 @@ export default function LandingPage({ theme = "indigo", showThemePicker = false 
         </div>
       </section>
 
-      {/* ------------------------------------------------------------ CTA -- */}
-      <section className="lp-cta" id="start">
-        <div className="lp-cta-bg" aria-hidden="true">
-          <span className="lp-blob c1" />
-          <span className="lp-blob c2" />
-        </div>
-        <div className="lp-cta-in" data-reveal>
-          <h2 className="lp-cta-h2">Ready to run a tighter PMO?</h2>
-          <p className="lp-cta-sub">
+      {/* ------------------------------------------------------ BOOK A DEMO -- */}
+      <DemoSection />
+
+      {/* --------------------------------------------------------- FOOTER -- */}
+      <footer className="lp-foot" id="footer">
+        <div className="lp-foot-cta" data-reveal>
+          <h2 className="lp-foot-cta-h">Ready to run a tighter PMO?</h2>
+          <p className="lp-foot-cta-sub">
             Give your team the tools to plan, track, and deliver — with full visibility at
             every level.
           </p>
-          <div className="lp-cta-btns">
-            <a className="lp-btn-primary lg" href="#start">
-              Get started free <span className="lp-arrow">→</span>
+          <div className="lp-foot-cta-btns">
+            <a className="lp-btn-primary lg" href="#demo">
+              Book a Demo <span className="lp-arrow">→</span>
             </a>
             <a className="lp-btn-outline lg" href="#signin">Sign in to your account</a>
           </div>
-          <div className="lp-cta-badges">
-            {HERO_BADGES.map((b) => (
-              <span key={b}>
-                <i className="lp-tick">✓</i>
-                {b}
-              </span>
-            ))}
-          </div>
         </div>
-      </section>
 
-      {/* --------------------------------------------------------- FOOTER -- */}
-      <footer className="lp-foot">
         <div className="lp-foot-in">
           <div className="lp-foot-brand">
             <a className="lp-brand" href="#top">
@@ -1082,7 +1185,7 @@ export default function LandingPage({ theme = "indigo", showThemePicker = false 
 /* ================================================================= CSS ==== */
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400&display=swap');
 
 .lp{
   --ink:#0C1027;
@@ -1093,16 +1196,16 @@ const CSS = `
   --paper:#FFFFFF;
   --canvas:#F7F8FD;
 
-  --ind:#4F46E5;
-  --ind-6:#4338CA;
-  --ind-4:#6366F1;
-  --ind-2:#A5B4FC;
-  --ind-tint:#EEF0FF;
-  --ind-line:#DDE1FE;
-  --cyan:#0891B2;
-  --cyan-tint:#E0F5FA;
-  --blob-a:#C7D2FE;
-  --blob-b:#CFFAFE;
+  --ind:#0056D2;
+  --ind-6:#00419E;
+  --ind-4:#2472E0;
+  --ind-2:#9CC1F4;
+  --ind-tint:#EAF1FD;
+  --ind-line:#D2E2FA;
+  --cyan:#0B6E99;
+  --cyan-tint:#E3F0F6;
+  --blob-a:#CFE0FA;
+  --blob-b:#E1EFFB;
 
   --green:#0E9F6E;
   --amber:#D97706;
@@ -1118,7 +1221,7 @@ const CSS = `
 
   background:var(--paper);
   color:var(--ink);
-  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  font-family:'Source Sans 3',system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
 }
@@ -1137,7 +1240,7 @@ const CSS = `
   position:fixed;right:20px;bottom:20px;z-index:90;background:#fff;border:1px solid var(--line);
   border-radius:14px;padding:13px 15px;box-shadow:var(--sh-3);display:flex;flex-direction:column;gap:9px;max-width:290px;
 }
-.lp-theming-t{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3)}
+.lp-theming-t{font-family:'Source Sans 3',system-ui,sans-serif;font-size:9.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3)}
 .lp-theming-row{display:flex;flex-wrap:wrap;gap:6px}
 .lp-swatch{
   display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink-2);
@@ -1154,9 +1257,9 @@ const CSS = `
 .lp-nav.stuck{background:rgba(255,255,255,.85);backdrop-filter:blur(14px) saturate(1.6);border-bottom-color:var(--line);box-shadow:0 1px 20px rgba(12,16,39,.05)}
 .lp-nav-in{max-width:1280px;margin:0 auto;padding:16px 32px;display:flex;align-items:center;gap:32px}
 .lp-brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.lp-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--ind-4),var(--ind-6));display:grid;place-items:center;box-shadow:0 4px 12px rgba(79,70,229,.32)}
+.lp-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--ind-4),var(--ind-6));display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,86,210,.30)}
 .lp-logo svg{width:19px;height:19px;fill:none;stroke:#fff;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
-.lp-brand-txt{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:19px;letter-spacing:-.4px;color:var(--ink)}
+.lp-brand-txt{font-family:'Source Sans 3',system-ui,sans-serif;font-weight:600;font-size:19px;letter-spacing:-.4px;color:var(--ink)}
 .lp-brand-txt b{font-weight:800;color:var(--ind)}
 .lp-nav-links{display:flex;gap:4px;margin-left:auto}
 .lp-nav-links a{font-size:14px;font-weight:500;color:var(--ink-2);padding:8px 13px;border-radius:8px;transition:color .18s,background .18s}
@@ -1168,14 +1271,14 @@ const CSS = `
 /* ---------- buttons ---------- */
 .lp-btn-primary{
   position:relative;display:inline-flex;align-items:center;gap:9px;
-  font-weight:600;font-size:15px;color:#fff;padding:14px 24px;border-radius:11px;
-  background:linear-gradient(135deg,var(--ind-4),var(--ind-6));
-  box-shadow:0 4px 14px rgba(79,70,229,.3),inset 0 1px 0 rgba(255,255,255,.22);
-  transition:transform .18s cubic-bezier(.16,1,.3,1),box-shadow .18s;
+  font-weight:700;font-size:15px;color:#fff;padding:14px 24px;border-radius:11px;
+  background:var(--ind);
+  box-shadow:0 4px 14px rgba(0,86,210,.28),inset 0 1px 0 rgba(255,255,255,.18);
+  transition:transform .18s cubic-bezier(.16,1,.3,1),box-shadow .18s,background .18s;
   overflow:hidden;
 }
-.lp-btn-primary::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.34) 50%,transparent 70%);transform:translateX(-120%);transition:transform .7s}
-.lp-btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(79,70,229,.4),inset 0 1px 0 rgba(255,255,255,.22)}
+.lp-btn-primary::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-120%);transition:transform .7s}
+.lp-btn-primary:hover{background:var(--ind-6);transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,86,210,.38),inset 0 1px 0 rgba(255,255,255,.18)}
 .lp-btn-primary:hover::after{transform:translateX(120%)}
 .lp-btn-primary.sm{font-size:14px;padding:9px 17px;border-radius:9px}
 .lp-btn-primary.lg{font-size:16px;padding:16px 30px}
@@ -1194,7 +1297,7 @@ const CSS = `
 
 .lp-mobile{display:none;flex-direction:column;background:#fff;border-top:1px solid var(--line);padding:12px 24px 20px;gap:2px;box-shadow:var(--sh-2)}
 .lp-mobile a{padding:12px 4px;font-weight:600;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
-.lp-mobile-cta{margin-top:12px;text-align:center;background:linear-gradient(135deg,var(--ind-4),var(--ind-6));color:#fff!important;border-radius:10px;border:0!important}
+.lp-mobile-cta{margin-top:12px;text-align:center;background:var(--ind);color:#fff!important;border-radius:10px;border:0!important;font-weight:700}
 
 /* ---------- hero ---------- */
 .lp-hero{position:relative;padding:130px 32px 70px;overflow:hidden;background:var(--paper)}
@@ -1217,15 +1320,15 @@ const CSS = `
 
 .lp-eyebrow{
   display:inline-flex;align-items:center;gap:8px;
-  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.4px;
+  font-family:'Source Sans 3',system-ui,sans-serif;font-size:11px;font-weight:600;letter-spacing:1.4px;
   color:var(--ind-6);background:var(--ind-tint);border:1px solid var(--ind-line);
   padding:7px 14px;border-radius:100px;margin-bottom:26px;
   animation:rise .7s cubic-bezier(.16,1,.3,1) both;
 }
-.lp-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--ind);box-shadow:0 0 0 0 rgba(79,70,229,.5);animation:pulse 2.2s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(79,70,229,.45)}70%{box-shadow:0 0 0 8px rgba(79,70,229,0)}100%{box-shadow:0 0 0 0 rgba(79,70,229,0)}}
+.lp-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--ind);box-shadow:0 0 0 0 rgba(0,86,210,.5);animation:pulse 2.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,86,210,.45)}70%{box-shadow:0 0 0 8px rgba(0,86,210,0)}100%{box-shadow:0 0 0 0 rgba(0,86,210,0)}}
 
-.lp-h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:60px;line-height:1.03;letter-spacing:-2.4px;margin-bottom:24px}
+.lp-h1{font-family:'Source Sans 3',system-ui,sans-serif;font-weight:800;font-size:60px;line-height:1.03;letter-spacing:-2.4px;margin-bottom:24px}
 .lp-h1-l{display:block;animation:rise .8s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.06s * var(--i) + .08s)}
 .lp-h1-l.accent{
   background:linear-gradient(100deg,var(--ind-4) 0%,var(--ind-6) 42%,var(--cyan) 100%);
@@ -1270,12 +1373,12 @@ const CSS = `
 .ap-dot.r{background:#FF6058}.ap-dot.y{background:#FFBD2E}.ap-dot.g{background:#28C840}
 .ap-win-url{
   flex:1;margin:0 8px;background:#fff;border:1px solid var(--line);border-radius:7px;
-  font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-2);
+  font-family:'Source Sans 3',system-ui,sans-serif;font-size:10.5px;color:var(--ink-2);
   padding:4px 10px;display:flex;align-items:center;gap:6px;justify-content:center;
 }
 .ap-lock{font-size:8px}
 .ap-url-dim{color:var(--ind-4)}
-.ap-live{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.6px;color:var(--green);background:var(--green-t);padding:3px 8px;border-radius:100px}
+.ap-live{display:inline-flex;align-items:center;gap:5px;font-family:'Source Sans 3',system-ui,sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.6px;color:var(--green);background:var(--green-t);padding:3px 8px;border-radius:100px}
 .ap-live i{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.6s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 
@@ -1284,9 +1387,9 @@ const CSS = `
 /* sidebar */
 .ap-side{background:#FAFBFF;border-right:1px solid var(--line);padding:12px 6px;display:flex;flex-direction:column;gap:2px}
 .ap-side-brand{display:flex;align-items:center;gap:7px;padding:4px 6px 12px}
-.ap-side-logo{width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,var(--ind-4),var(--ind-6));color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;font-family:'Bricolage Grotesque',sans-serif}
+.ap-side-logo{width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,var(--ind-4),var(--ind-6));color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;font-family:'Source Sans 3',system-ui,sans-serif}
 .ap-side-name{font-size:12px;font-weight:700;letter-spacing:-.2px}
-.ap-side-sec{font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:600;letter-spacing:1px;color:var(--ink-3);padding:6px 8px 4px;text-transform:uppercase}
+.ap-side-sec{font-family:'Source Sans 3',system-ui,sans-serif;font-size:8.5px;font-weight:600;letter-spacing:1px;color:var(--ink-3);padding:6px 8px 4px;text-transform:uppercase}
 .ap-side-item{
   position:relative;display:flex;align-items:center;gap:6px;padding:7px 6px;border-radius:7px;
   font-size:10.5px;font-weight:500;color:var(--ink-2);text-align:left;
@@ -1304,7 +1407,7 @@ const CSS = `
 /* main */
 .ap-main{display:flex;flex-direction:column;background:#fff}
 .ap-crumbs{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line-2)}
-.ap-crumb-txt{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.4px;color:var(--ink-3);text-transform:uppercase}
+.ap-crumb-txt{font-family:'Source Sans 3',system-ui,sans-serif;font-size:10px;font-weight:600;letter-spacing:.4px;color:var(--ink-3);text-transform:uppercase}
 .ap-chip{font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;white-space:nowrap}
 .ap-chip.ok{background:var(--green-t);color:var(--green)}
 .ap-chip.warn{background:var(--amber-t);color:var(--amber)}
@@ -1316,7 +1419,7 @@ const CSS = `
 .ap-screen{display:flex;flex-direction:column;height:100%;gap:9px}
 .ap-scr-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .ap-scr-title{font-size:12.5px;font-weight:700;letter-spacing:-.2px}
-.ap-scr-meta{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink-3)}
+.ap-scr-meta{font-family:'Source Sans 3',system-ui,sans-serif;font-size:9.5px;color:var(--ink-3)}
 .ap-scr-foot{display:flex;align-items:center;gap:12px;padding-top:8px;border-top:1px solid var(--line-2);margin-top:auto}
 .ap-legend{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;color:var(--ink-3);font-weight:500}
 .ap-legend .lg{width:12px;height:3px;border-radius:2px;background:var(--ind-2);display:block}
@@ -1328,7 +1431,7 @@ const CSS = `
 .ap-ai-note{font-size:9.5px;color:var(--ind-6);font-weight:500;margin-left:auto}
 
 /* gantt */
-.ap-gantt-months{display:grid;grid-template-columns:repeat(5,1fr);margin-left:34%;font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--ink-3);letter-spacing:.5px;border-bottom:1px solid var(--line-2);padding-bottom:4px}
+.ap-gantt-months{display:grid;grid-template-columns:repeat(5,1fr);margin-left:34%;font-family:'Source Sans 3',system-ui,sans-serif;font-size:8.5px;color:var(--ink-3);letter-spacing:.5px;border-bottom:1px solid var(--line-2);padding-bottom:4px}
 .ap-gantt{position:relative;display:flex;flex-direction:column;gap:10px;padding-top:8px}
 .ap-gantt-row{display:grid;grid-template-columns:34% 1fr;align-items:center;gap:8px}
 .ap-gantt-name{font-size:10px;font-weight:500;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1358,10 +1461,10 @@ const CSS = `
 .ap-raid-row:not(.ap-raid-hdr):hover{background:var(--ind-tint)}
 @keyframes rowIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
 .ap-raid-hdr{
-  font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:600;letter-spacing:.7px;
+  font-family:'Source Sans 3',system-ui,sans-serif;font-size:8.5px;font-weight:600;letter-spacing:.7px;
   color:var(--ink-3);text-transform:uppercase;border-bottom:1px solid var(--line-2);border-radius:0;padding-bottom:5px;animation:none;
 }
-.ap-raid-id{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--ind-6);font-size:9.5px}
+.ap-raid-id{font-family:'Source Sans 3',system-ui,sans-serif;font-weight:600;color:var(--ind-6);font-size:9.5px}
 .ap-raid-type{font-size:9px;color:var(--ink-3);font-weight:500}
 .ap-raid-d{display:flex;align-items:center;gap:6px;color:var(--ink);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:500}
 .ap-rag{width:6px;height:6px;border-radius:50%;flex-shrink:0}
@@ -1375,7 +1478,7 @@ const CSS = `
 /* scrum */
 .ap-board{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex:1}
 .ap-col{background:var(--canvas);border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:5px;animation:rowIn .5s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.07s * var(--i))}
-.ap-col-hdr{display:flex;align-items:center;justify-content:space-between;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;letter-spacing:.2px;color:var(--ink-3);text-transform:uppercase;padding:1px 2px 4px;white-space:nowrap}
+.ap-col-hdr{display:flex;align-items:center;justify-content:space-between;gap:4px;font-family:'Source Sans 3',system-ui,sans-serif;font-size:8px;font-weight:600;letter-spacing:.2px;color:var(--ink-3);text-transform:uppercase;padding:1px 2px 4px;white-space:nowrap}
 .ap-col-hdr .wip{font-style:normal;font-size:8px;background:#fff;border:1px solid var(--line);color:var(--ink-3);padding:1px 5px;border-radius:100px}
 .ap-col-hdr .wip.block{background:var(--red-t);border-color:transparent;color:var(--red)}
 .ap-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 7px;box-shadow:0 1px 2px rgba(12,16,39,.04);animation:rowIn .5s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.045s * var(--i) + .1s);transition:transform .2s,box-shadow .2s}
@@ -1386,8 +1489,8 @@ const CSS = `
 .ap-prio.high{background:var(--red-t);color:var(--red)}
 .ap-prio.med{background:var(--amber-t);color:var(--amber)}
 .ap-prio.low{background:var(--line-2);color:var(--ink-3)}
-.ap-pts{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--ind-6);background:var(--ind-tint);width:15px;height:15px;border-radius:4px;display:grid;place-items:center}
-.ap-burn{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.ap-pts{font-family:'Source Sans 3',system-ui,sans-serif;font-size:9px;font-weight:600;color:var(--ind-6);background:var(--ind-tint);width:15px;height:15px;border-radius:4px;display:grid;place-items:center}
+.ap-burn{font-family:'Source Sans 3',system-ui,sans-serif;font-size:9px;color:var(--ink-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
 .ap-burn-svg{flex:1;height:22px}
 .ap-burn-svg polyline{fill:none;stroke:var(--ink-3);stroke-width:1;stroke-dasharray:2 2;vector-effect:non-scaling-stroke}
 .ap-burn-svg polyline.actual{stroke:var(--ind);stroke-width:1.6;stroke-dasharray:none}
@@ -1400,8 +1503,8 @@ const CSS = `
 }
 .ap-kpi.green{border-color:#C6EEDD;background:#F6FDFA}
 .ap-kpi.amber{border-color:#F6DEBB;background:#FFFCF6}
-.ap-kpi-k{font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:600;letter-spacing:.8px;color:var(--ink-3)}
-.ap-kpi-v{font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+.ap-kpi-k{font-family:'Source Sans 3',system-ui,sans-serif;font-size:8.5px;font-weight:600;letter-spacing:.8px;color:var(--ink-3)}
+.ap-kpi-v{font-family:'Source Sans 3',system-ui,sans-serif;font-size:17px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
 .ap-kpi.green .ap-kpi-v{color:var(--green)}
 .ap-kpi.amber .ap-kpi-v{color:var(--amber)}
 .ap-kpi-n{font-size:8px;color:var(--ink-3)}
@@ -1426,7 +1529,7 @@ const CSS = `
 .ap-win-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--canvas)}
 .ap-wstat{padding:11px 8px;text-align:center;border-right:1px solid var(--line)}
 .ap-wstat:last-child{border-right:0}
-.ap-wstat b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:800;letter-spacing:-.6px;color:var(--ind-6);line-height:1.15}
+.ap-wstat b{display:block;font-family:'Source Sans 3',system-ui,sans-serif;font-size:19px;font-weight:800;letter-spacing:-.6px;color:var(--ind-6);line-height:1.15}
 .ap-wstat span{font-size:9.5px;color:var(--ink-3);font-weight:500}
 
 /* ---------- stat bar ---------- */
@@ -1434,19 +1537,23 @@ const CSS = `
 .lp-statbar-in{max-width:1280px;margin:0 auto;padding:30px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .lp-statdiv{width:1px;height:38px;background:linear-gradient(180deg,transparent,var(--line),transparent)}
 .lp-stat{text-align:center;flex:1}
-.lp-stat-n{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:34px;font-weight:800;letter-spacing:-1.4px;line-height:1.05;background:linear-gradient(135deg,var(--ind-4),var(--ind-6));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.lp-stat-l{display:block;margin-top:5px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3)}
+.lp-stat-n{display:block;font-family:'Source Sans 3',system-ui,sans-serif;font-size:34px;font-weight:800;letter-spacing:-1.4px;line-height:1.05;background:linear-gradient(135deg,var(--ind-4),var(--ind-6));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lp-stat-l{display:block;margin-top:5px;font-family:'Source Sans 3',system-ui,sans-serif;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3)}
 
-/* ---------- sections ---------- */
-.lp-sec{padding:88px 32px;background:var(--paper);position:relative}
+/* ---------- sections (each fills one screen) ---------- */
+.lp *[id]{scroll-margin-top:70px}
+.lp-sec{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:92px 32px;background:var(--paper);position:relative;
+}
 .lp-sec.tint{background:var(--canvas);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.lp-sec-head{max-width:1280px;margin:0 auto 44px;text-align:center}
+.lp-sec-head{max-width:1280px;margin:0 auto 40px;text-align:center}
 .lp-kicker{
-  display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+  display:inline-block;font-family:'Source Sans 3',system-ui,sans-serif;font-size:11px;font-weight:600;
   letter-spacing:1.6px;text-transform:uppercase;color:var(--ind-6);
   background:var(--ind-tint);padding:6px 13px;border-radius:100px;margin-bottom:16px;
 }
-.lp-h2{font-family:'Bricolage Grotesque',sans-serif;font-size:40px;font-weight:700;letter-spacing:-1.5px;line-height:1.12;margin-bottom:12px}
+.lp-h2{font-family:'Source Sans 3',system-ui,sans-serif;font-size:40px;font-weight:700;letter-spacing:-1.5px;line-height:1.12;margin-bottom:12px}
 .lp-sec-sub{font-size:16.5px;line-height:1.6;color:var(--ink-3);max-width:600px;margin:0 auto}
 
 /* ---------- feature explorer ---------- */
@@ -1459,7 +1566,7 @@ const CSS = `
 .lp-feat-nav::-webkit-scrollbar{width:6px}
 .lp-feat-nav::-webkit-scrollbar-thumb{background:var(--line);border-radius:100px}
 .lp-feat-group{
-  font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.2px;
+  font-family:'Source Sans 3',system-ui,sans-serif;font-size:9px;font-weight:600;letter-spacing:1.2px;
   text-transform:uppercase;color:var(--ink-3);padding:14px 10px 6px;
 }
 .lp-ftab{
@@ -1479,8 +1586,8 @@ const CSS = `
 
 .lp-feat-panel{position:relative;padding:44px 44px;display:flex;flex-direction:column;animation:panelIn .45s cubic-bezier(.16,1,.3,1) both;overflow:hidden}
 @keyframes panelIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.lp-panel-kicker{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1.3px;color:var(--ind);margin-bottom:12px}
-.lp-panel-h3{font-family:'Bricolage Grotesque',sans-serif;font-size:29px;font-weight:700;letter-spacing:-1px;line-height:1.18;margin-bottom:12px;max-width:520px}
+.lp-panel-kicker{font-family:'Source Sans 3',system-ui,sans-serif;font-size:10px;font-weight:600;letter-spacing:1.3px;color:var(--ind);margin-bottom:12px}
+.lp-panel-h3{font-family:'Source Sans 3',system-ui,sans-serif;font-size:29px;font-weight:700;letter-spacing:-1px;line-height:1.18;margin-bottom:12px;max-width:520px}
 .lp-panel-desc{font-size:16px;line-height:1.68;color:var(--ink-2);max-width:560px;margin-bottom:26px}
 .lp-panel-bullets{display:grid;grid-template-columns:1fr 1fr;gap:12px 22px;max-width:600px}
 .lp-panel-bullet{
@@ -1513,7 +1620,7 @@ const CSS = `
 .lp-role.cyan .lp-role-ico{background:var(--cyan-tint)}
 .lp-role.amber .lp-role-ico{background:var(--amber-t)}
 .lp-role.slate .lp-role-ico{background:var(--line-2)}
-.lp-role-name{font-family:'Bricolage Grotesque',sans-serif;font-size:17.5px;font-weight:700;letter-spacing:-.4px;line-height:1.2}
+.lp-role-name{font-family:'Source Sans 3',system-ui,sans-serif;font-size:17.5px;font-weight:700;letter-spacing:-.4px;line-height:1.2}
 .lp-role-scope{font-size:12.5px;color:var(--ink-3);font-weight:500}
 .lp-role-list{display:flex;flex-direction:column;gap:9px}
 .lp-role-list li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--ink-2);font-weight:500}
@@ -1534,10 +1641,10 @@ const CSS = `
   transition:transform .3s cubic-bezier(.16,1,.3,1);
 }
 .lp-card:hover .lp-card-ico{transform:scale(1.08) rotate(-4deg)}
-.lp-card-t{font-family:'Bricolage Grotesque',sans-serif;font-size:17.5px;font-weight:700;letter-spacing:-.4px;line-height:1.3;margin-bottom:9px}
+.lp-card-t{font-family:'Source Sans 3',system-ui,sans-serif;font-size:17.5px;font-weight:700;letter-spacing:-.4px;line-height:1.3;margin-bottom:9px}
 .lp-card-b{font-size:14.5px;line-height:1.62;color:var(--ink-3)}
 .lp-card-num{
-  position:absolute;top:16px;right:20px;font-family:'Bricolage Grotesque',sans-serif;
+  position:absolute;top:16px;right:20px;font-family:'Source Sans 3',system-ui,sans-serif;
   font-size:34px;font-weight:800;color:var(--line-2);letter-spacing:-1px;line-height:1;
   transition:color .28s;
 }
@@ -1549,19 +1656,60 @@ const CSS = `
 .lp-blob.c1{width:520px;height:520px;background:radial-gradient(circle,var(--blob-a),transparent 66%);bottom:-260px;left:8%;opacity:.6}
 .lp-blob.c2{width:460px;height:460px;background:radial-gradient(circle,var(--blob-b),transparent 66%);top:-200px;right:10%;opacity:.6}
 .lp-cta-in{position:relative;max-width:720px;margin:0 auto}
-.lp-cta-h2{font-family:'Bricolage Grotesque',sans-serif;font-size:44px;font-weight:800;letter-spacing:-1.8px;line-height:1.1;margin-bottom:16px}
+.lp-cta-h2{font-family:'Source Sans 3',system-ui,sans-serif;font-size:44px;font-weight:800;letter-spacing:-1.8px;line-height:1.1;margin-bottom:16px}
 .lp-cta-sub{font-size:17.5px;line-height:1.62;color:var(--ink-2);margin-bottom:30px}
 .lp-cta-btns{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
 .lp-cta-badges{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
 .lp-cta-badges span{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;color:var(--ink-3)}
 
-/* ---------- footer ---------- */
-.lp-foot{background:#fff;border-top:1px solid var(--line);padding:60px 32px 0}
+/* ---------- book a demo ---------- */
+.lp-sec.demo{background:linear-gradient(180deg,#FFFFFF 0%,var(--ind-tint) 100%);border-top:1px solid var(--line)}
+.lp-demo{max-width:1180px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center}
+.lp-demo-left .lp-kicker{margin-bottom:16px}
+.lp-demo-left .lp-h2{text-align:left}
+.lp-demo-sub{margin:0 0 28px;text-align:left}
+.lp-demo-points{display:flex;flex-direction:column;gap:16px}
+.lp-demo-point{display:flex;gap:14px;align-items:flex-start;animation:rise .6s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.08s * var(--i) + .1s)}
+.lp-demo-point-ico{width:40px;height:40px;flex-shrink:0;border-radius:11px;background:#fff;border:1px solid var(--ind-line);display:grid;place-items:center;font-size:18px;box-shadow:var(--sh-1)}
+.lp-demo-point h3{font-family:'Source Sans 3',system-ui,sans-serif;font-size:15.5px;font-weight:700;letter-spacing:-.2px;margin-bottom:2px}
+.lp-demo-point p{font-size:13.5px;line-height:1.55;color:var(--ink-3)}
+
+.lp-demo-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh-3);padding:30px 30px 26px}
+.lp-demo-form-t{font-family:'Source Sans 3',system-ui,sans-serif;font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:18px}
+.lp-field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lp-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.lp-field>span{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.lp-field input,.lp-field textarea{
+  font-family:'Source Sans 3',system-ui,sans-serif;font-size:14px;color:var(--ink);
+  border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;background:#fff;
+  transition:border-color .18s,box-shadow .18s;resize:vertical;
+}
+.lp-field input::placeholder,.lp-field textarea::placeholder{color:#9AA3BD}
+.lp-field input:focus,.lp-field textarea:focus{outline:none;border-color:var(--ind);box-shadow:0 0 0 3px var(--ind-tint)}
+.lp-chipset{display:flex;gap:8px;flex-wrap:wrap}
+.lp-sizechip{border:1.5px solid var(--line);background:#fff;color:var(--ink-2);font-size:13px;font-weight:600;padding:8px 14px;border-radius:100px;transition:all .16s}
+.lp-sizechip:hover{border-color:var(--ind-2)}
+.lp-sizechip.on{border-color:var(--ind);background:var(--ind-tint);color:var(--ind-6)}
+.lp-demo-submit{width:100%;justify-content:center;margin-top:4px}
+.lp-demo-fine{text-align:center;font-size:11.5px;color:var(--ink-3);margin-top:12px}
+
+.lp-demo-done{text-align:center;padding:26px 8px;display:flex;flex-direction:column;align-items:center;gap:10px;animation:panelIn .45s cubic-bezier(.16,1,.3,1) both}
+.lp-demo-done-ico{width:52px;height:52px;border-radius:50%;background:var(--green-t);color:var(--green);display:grid;place-items:center;font-size:26px;font-weight:800}
+.lp-demo-done h3{font-family:'Source Sans 3',system-ui,sans-serif;font-size:20px;font-weight:700;letter-spacing:-.4px}
+.lp-demo-done p{font-size:14.5px;line-height:1.6;color:var(--ink-3);max-width:340px}
+.lp-demo-done .lp-btn-outline{margin-top:6px;padding:11px 20px}
+
+/* ---------- footer (screen) ---------- */
+.lp-foot{min-height:100vh;display:flex;flex-direction:column;justify-content:center;background:var(--canvas);border-top:1px solid var(--line);padding:80px 32px 28px}
+.lp-foot-cta{max-width:720px;margin:0 auto 56px;text-align:center}
+.lp-foot-cta-h{font-family:'Source Sans 3',system-ui,sans-serif;font-size:40px;font-weight:900;letter-spacing:-1.4px;line-height:1.12;margin-bottom:14px}
+.lp-foot-cta-sub{font-size:17px;line-height:1.6;color:var(--ink-2);margin-bottom:28px}
+.lp-foot-cta-btns{display:flex;gap:13px;justify-content:center;flex-wrap:wrap}
 .lp-foot-in{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:36px;padding-bottom:44px}
 .lp-foot-brand .lp-brand{margin-bottom:14px}
 .lp-foot-blurb{font-size:14px;line-height:1.68;color:var(--ink-3);max-width:290px}
 .lp-foot-col h4{
-  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1.3px;
+  font-family:'Source Sans 3',system-ui,sans-serif;font-size:10px;font-weight:600;letter-spacing:1.3px;
   text-transform:uppercase;color:var(--ink);margin-bottom:14px;
 }
 .lp-foot-col a{display:block;font-size:14px;color:var(--ink-3);padding:5px 0;transition:color .18s,transform .18s}
@@ -1621,9 +1769,9 @@ const CSS = `
   .ap-kpis{grid-template-columns:repeat(2,1fr)}
   .ap-raid-row{grid-template-columns:44px 1fr 60px}
   .ap-raid-type,.ap-raid-o{display:none}
-  .lp-cta{padding:72px 20px}
-  .lp-cta-h2{font-size:32px;letter-spacing:-1.2px}
-  .lp-foot{padding:48px 20px 0}
+  .lp-demo{grid-template-columns:1fr;gap:34px}
+  .lp-demo-left .lp-h2,.lp-demo-sub{text-align:left}
+  .lp-foot{min-height:auto;padding:48px 20px 20px}
   .lp-foot-in{grid-template-columns:1fr 1fr;gap:28px}
   .lp-foot-bar{flex-direction:column;text-align:center}
 }
@@ -1634,6 +1782,8 @@ const CSS = `
   .lp-btn-primary,.lp-btn-outline{justify-content:center}
   .ap-board{grid-template-columns:1fr}
   .lp-foot-in{grid-template-columns:1fr}
+  .lp-field-row{grid-template-columns:1fr}
+  .lp-demo-card{padding:24px 20px 22px}
 }
 @media(prefers-reduced-motion:reduce){
   .lp *,.lp *::before,.lp *::after{animation:none!important;transition:none!important}
